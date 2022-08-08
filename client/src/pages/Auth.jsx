@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from "axios"
 import chat from "../assets/chat.png"
 import { ToastContainer, toast } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css'
-import {authRoute} from "../utils/APIRoutes"
+import {signupRoute} from "../utils/APIRoutes"
+import { useNavigate } from 'react-router-dom'
+import { loginRoute } from '../utils/APIRoutes'
 
 const initialState={
     userName:"",
@@ -22,6 +24,7 @@ const toastOptions={
 const Auth = () => {
     const [form, setForm] = useState(initialState);
     const [isSignUp, setIsSignup] = useState(true);
+    const navigate= useNavigate()
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -30,15 +33,37 @@ const Auth = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if(handleValidation()){
+        if(handleSignupValidation()){
             const { userName, password, email } = form
-            const {data}=await axios.post(authRoute, {
+            const {data}=await axios.post(signupRoute, {
                 userName,email, password
             })
+
+            if(data === false){
+                toast.error(data.msg, toastOptions)
+            }
+            if(data === true){
+                localStorage.setItem("chat-app-user", JSON.stringify(data.user))
+            }
+            navigate("/")
+        }
+        if(handleLoginValidation()){
+            const {userName, password}= form
+            const {data}=await axios.get(loginRoute, {
+                userName, password
+            })
+            console.log(data)
+            if(data === false){
+                toast.error(data.msg, toastOptions)
+            }
+            if(data === true){
+                localStorage.setItem("chat-app-user", JSON.stringify(data.user))
+            }
+            navigate("/")
         }
     }
 
-    const handleValidation=()=>{
+    const handleSignupValidation=()=>{
         const {userName, password, confirmPassword, email }=form
         if(userName.length < 3){
             toast.error("UserName is short", toastOptions)
@@ -56,6 +81,23 @@ const Auth = () => {
         }
         return true
     }
+
+    const handleLoginValidation=()=>{
+        const {userName, password}=form
+        if(userName.length === ""){
+            toast.error("Username is required", toastOptions)
+            return false
+        }else if (password === ""){
+            toast.error("password is required", toastOptions)
+            return false
+        }
+        return true
+    }
+
+    useEffect(()=>{
+        if(localStorage.getItem("chat-app-user"))
+            navigate('/')
+    }, [navigate])
 
     const switchMode = () => {
         setIsSignup((prevIsSignup) => !prevIsSignup);

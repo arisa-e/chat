@@ -1,2 +1,5 @@
 export { default as Auth } from "./Auth"
 export { default as Chat } from "./Chat"
+export { default as Signup } from "./Signup"
+export { default as Login } from "./Login"
+export { default as SetAvatar } from "./SetAvatar"

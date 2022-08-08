@@ -1,7 +1,7 @@
 const express = require ('express')
 const cors= require ('cors')
-const { default: mongoose } = require('mongoose')
-const router = require('./routes/routes')
+const mongoose = require('mongoose')
+const userRouter = require('./routes/userRoutes')
 
 const app =express()
 require('dotenv').config()
@@ -9,9 +9,7 @@ require('dotenv').config()
 app.use(cors())
 app.use(express.json())
 
-app.use('/api/auth', router)
-
-mongoose.connect("mongodb://localhost:27017/chat", {
+mongoose.connect(process.env.MONGODB, {
     useNewUrlParser: true,
     useUnifiedtopology:true
 }).then(()=>{
@@ -19,6 +17,9 @@ mongoose.connect("mongodb://localhost:27017/chat", {
 }).catch((error)=>{
     console.log(error.message)
 })
+
+app.use('/api/auth', userRouter)
+// app.use('api/message', messageRoutes)
 
 app.listen(process.env.PORT, ()=>{
     console.log(`Server is running in Port: ${process.env.PORT}`)
